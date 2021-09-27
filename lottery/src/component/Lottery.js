@@ -51,6 +51,12 @@ class Lottery extends React.PureComponent {
         return lotteryNumbers;
     }
 
+    removeLotteryNumbers = (index) => {
+        this.setState({
+            numbers: this.state.numbers.filter((lotteryNumbers,idx) => index !== idx)
+        })
+    }
+
     render = () => {
         // return MVC's V(iew)
         return ( // View
@@ -97,7 +103,7 @@ class Lottery extends React.PureComponent {
                                                   <td>{number}</td>
                                                )
                                         }
-                                        <td><button className="btn btn-danger">Remove</button></td>
+                                        <td><button onClick={() => this.removeLotteryNumbers(index)} className="btn btn-danger">Remove</button></td>
                                         </tr>)
                                 }
                                 </tbody>
