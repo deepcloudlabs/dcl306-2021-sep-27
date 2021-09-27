@@ -85,6 +85,7 @@ class Lottery extends React.PureComponent {
                                                <th>Column #{i+1}</th>
                                            )
                                         }
+                                        <th>Operations</th>
                                     </tr>
                                 </thead>
                                 <tbody>{
@@ -95,7 +96,9 @@ class Lottery extends React.PureComponent {
                                                lotteryNumbers.map( number =>
                                                   <td>{number}</td>
                                                )
-                                        }</tr>)
+                                        }
+                                        <td><button className="btn btn-danger">Remove</button></td>
+                                        </tr>)
                                 }
                                 </tbody>
                             </table>
