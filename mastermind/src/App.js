@@ -2,6 +2,9 @@ import logo from './logo.svg';
 import './App.css';
 import React from "react";
 import Move from "./model/move";
+import Badge from "./component/badge";
+import CardTitle from "./component/card-title";
+import TableHeader from "./component/table-header";
 // Game Level: 3 -> 549 -> secret
 //                  123 -> No match
 //                  456 -> -2
@@ -11,9 +14,10 @@ import Move from "./model/move";
 //                  ... at most 10 moves -> User loses!
 //                  ... 60 seconds -> User loses! ->
 //                  statistics: Wins: 10 Loses: 22, ...
-//                  HTML5 -> Local storage -> component life cycle
-// Stateles + Stateful Component, Component Life Cycle
-// Redux, Routing
+//                  -> HTML5 -> Local storage -> component life cycle
+// Stateless + Stateful Component ✔
+// Component Life Cycle
+// -> Redux, -> Routing
 class App extends React.PureComponent {
     constructor(props, context) {
         super(props, context);
@@ -33,18 +37,18 @@ class App extends React.PureComponent {
         };
     }
 
-    createDigit = (min,max) => {
-        return Math.floor(Math.random()*(max-min+1) + min);
+    createDigit = (min, max) => {
+        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
     createSecret = (level) => {
-        let digits = [this.createDigit(1,9)];
-        while (digits.length<level){
-            let digit = this.createDigit(0,9);
+        let digits = [this.createDigit(1, 9)];
+        while (digits.length < level) {
+            let digit = this.createDigit(0, 9);
             if (!digits.includes(digit))
                 digits.push(digit);
         }
-        return digits.reduce((number,digit) => 10*number + digit, 0);
+        return digits.reduce((number, digit) => 10 * number + digit, 0);
     }
 
     handleChange = (event) => {
@@ -57,9 +61,9 @@ class App extends React.PureComponent {
         let game = {...this.state.game};
         let statistics = {...this.state.statistics};
         game.tries++;
-        if (game.guess === game.secret){
+        if (game.guess === game.secret) {
             game.level++;
-            if (game.level > 10){
+            if (game.level > 10) {
                 //TODO: Player wins!: routing!
                 statistics.wins++;
             } else {
@@ -70,11 +74,11 @@ class App extends React.PureComponent {
                 this.setState({game});
             }
         } else {
-            if (game.tries > 10){
+            if (game.tries > 10) {
                 //TODO: Player loses!: routing!
                 statistics.loses++;
             } else {
-                game.moves.push(new Move(game.guess,this.createEvaluation(game.guess,game.secret)));
+                game.moves.push(new Move(game.guess, this.createEvaluation(game.guess, game.secret)));
                 this.setState({game});
             }
         }
@@ -85,12 +89,12 @@ class App extends React.PureComponent {
         let partialMatch = 0;
         let guessAsString = guess.toString();
         let secretAsString = secret.toString();
-        for (let i = 0; i< guessAsString.length;++i){
+        for (let i = 0; i < guessAsString.length; ++i) {
             let g = guessAsString.charAt(i);
-            for (let j = 0; j< secretAsString.length;++j){
+            for (let j = 0; j < secretAsString.length; ++j) {
                 let s = secretAsString.charAt(j);
-                if (g === s){
-                    if (i===j){
+                if (g === s) {
+                    if (i === j) {
                         perfectMatch++;
                     } else {
                         partialMatch++;
@@ -98,12 +102,12 @@ class App extends React.PureComponent {
                 }
             }
         }
-        if (partialMatch === 0 && perfectMatch=== 0)
+        if (partialMatch === 0 && perfectMatch === 0)
             return "No match";
         let evaluationString = "";
-        if (partialMatch>0)
+        if (partialMatch > 0)
             evaluationString += `-${partialMatch}`;
-        if (perfectMatch>0)
+        if (perfectMatch > 0)
             evaluationString += `+${perfectMatch}`;
         return evaluationString;
     }
@@ -112,22 +116,20 @@ class App extends React.PureComponent {
         return (
             <div className="container">
                 <div className="card">
-                    <div className="card-header">
-                        <div className="card-title"><h3>Game Console</h3></div>
-                    </div>
+                    <CardTitle title="Game Console"></CardTitle>
                     <div className="card-body">
-                        <div className="form-group">
-                            <label htmlFor="level">Game Level:</label>
-                            <span className="badge alert-info" id="level">{this.state.game.level}</span>
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="tries">Tries:</label>
-                            <span className="badge alert-info" id="tries">{this.state.game.tries}</span>
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="counter">Counter:</label>
-                            <span className="badge alert-info" id="counter">{this.state.game.counter}</span>
-                        </div>
+                        <Badge id="level"
+                               label="Game Level"
+                               className="alert-info"
+                               value={this.state.game.level}></Badge>
+                        <Badge id="tries"
+                               label="Tries"
+                               className="alert-primary"
+                               value={this.state.game.tries}></Badge>
+                        <Badge id="counter"
+                               label="Counter"
+                               className="alert-danger"
+                               value={this.state.game.counter}></Badge>
                         <div className="form-group">
                             <label htmlFor="guess">Guess:</label>
                             <input id="guess"
@@ -145,25 +147,17 @@ class App extends React.PureComponent {
                 </div>
                 <p></p>
                 <div className="card">
-                    <div className="card-header">
-                        <div className="card-title"><h3>Moves</h3></div>
-                    </div>
+                    <CardTitle title="Moves"></CardTitle>
                     <div className="card-body">
                         <table className="table table-bordered table-hover table-responsive table-info">
-                            <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Guess</th>
-                                <th>Evaluation</th>
-                            </tr>
-                            </thead>
+                            <TableHeader headers="No,Guess,Evaluation"></TableHeader>
                             <tbody>
                             {
-                                this.state.game.moves.map((move,index) =>
+                                this.state.game.moves.map((move, index) =>
                                     <tr>
-                                       <td>{index+1}</td>
-                                       <td>{move.guess}</td>
-                                       <td>{move.evaluation}</td>
+                                        <td>{index + 1}</td>
+                                        <td>{move.guess}</td>
+                                        <td>{move.evaluation}</td>
                                     </tr>
                                 )
                             }
@@ -173,18 +167,16 @@ class App extends React.PureComponent {
                 </div>
                 <p></p>
                 <div className="card">
-                    <div className="card-header">
-                        <div className="card-title"><h3>Statistics</h3></div>
-                    </div>
+                    <CardTitle title="Statistics"></CardTitle>
                     <div className="card-body">
-                        <div className="form-group">
-                            <label htmlFor="wins">Wins:</label>
-                            <span className="badge alert-success" id="wins">{this.state.statistics.wins} of {this.state.statistics.wins + this.state.statistics.loses}</span>
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="loses">Loses:</label>
-                            <span className="badge alert-danger" id="loses">{this.state.statistics.loses} of {this.state.statistics.wins + this.state.statistics.loses}</span>
-                        </div>
+                        <Badge id="wins"
+                               label="Wins"
+                               className="alert-success"
+                               value={this.state.statistics.wins + " of " + (this.state.statistics.wins + this.state.statistics.loses)}></Badge>
+                        <Badge id="loses"
+                               label="Loses"
+                               className="alert-danger"
+                               value={this.state.statistics.loses + " of " + (this.state.statistics.wins + this.state.statistics.loses)}></Badge>
                     </div>
                 </div>
             </div>
