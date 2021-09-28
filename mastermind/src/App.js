@@ -9,14 +9,15 @@ import TableHeader from "./component/table-header";
 //                  456 -> -2
 //                  574 -> -1+1
 //                  549 -> Game Level:4 -> 3615 -> secret
-//                  ... Game Level: 10 -> User wins
-//                  ... at most 10 moves -> User loses!
-//                  ... 60 seconds -> User loses! ->
+//                  ... Game Level: 10 -> User wins ✔
+//                  ... at most 10 moves -> User loses! ✔
+//                  ... 60 seconds -> User loses! -> ?
 //                  statistics: Wins: 10 Loses: 22, ...
 //                  ✔ HTML5 -> Local storage -> component life cycle
-// Stateless + Stateful Component ✔
-// Component Life Cycle
-// -> Redux, -> Routing
+// ✔ Stateless + Stateful Component
+// ✔ Component Life Cycle
+// -> Redux
+// ✔ Routing
 class App extends React.PureComponent {
     constructor(props, context) {
         super(props, context);
@@ -193,7 +194,7 @@ class App extends React.PureComponent {
                             <tbody>
                             {
                                 this.state.game.moves.map((move, index) =>
-                                    <tr>
+                                    <tr key={move.guess + index.toString()}>
                                         <td>{index + 1}</td>
                                         <td>{move.guess}</td>
                                         <td>{move.evaluation}</td>
