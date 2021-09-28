@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import React from "react";
+import Move from "./model/move";
 // Game Level: 3 -> 549 -> secret
 //                  123 -> No match
 //                  456 -> -2
@@ -18,7 +19,7 @@ class App extends React.PureComponent {
         super(props, context);
         this.state = {
             game: {
-                secret: 549,
+                secret: this.createSecret(3),
                 level: 3,
                 tries: 0,
                 guess: 123,
@@ -32,14 +33,79 @@ class App extends React.PureComponent {
         };
     }
 
+    createDigit = (min,max) => {
+        return Math.floor(Math.random()*(max-min+1) + min);
+    }
+
+    createSecret = (level) => {
+        let digits = [this.createDigit(1,9)];
+        while (digits.length<level){
+            let digit = this.createDigit(0,9);
+            if (!digits.includes(digit))
+                digits.push(digit);
+        }
+        return digits.reduce((number,digit) => 10*number + digit, 0);
+    }
+
     handleChange = (event) => {
         let game = {...this.state.game};
-        game.guess = event.target.value;
+        game.guess = Number(event.target.value);
         this.setState({game});
     }
 
     play = () => {
+        let game = {...this.state.game};
+        let statistics = {...this.state.statistics};
+        game.tries++;
+        if (game.guess === game.secret){
+            game.level++;
+            if (game.level > 10){
+                //TODO: Player wins!: routing!
+                statistics.wins++;
+            } else {
+                game.tries = 0;
+                game.moves = [];
+                game.secret = this.createSecret(game.level);
+                game.counter = 60;
+                this.setState({game});
+            }
+        } else {
+            if (game.tries > 10){
+                //TODO: Player loses!: routing!
+                statistics.loses++;
+            } else {
+                game.moves.push(new Move(game.guess,this.createEvaluation(game.guess,game.secret)));
+                this.setState({game});
+            }
+        }
+    }
 
+    createEvaluation = (guess, secret) => {
+        let perfectMatch = 0;
+        let partialMatch = 0;
+        let guessAsString = guess.toString();
+        let secretAsString = secret.toString();
+        for (let i = 0; i< guessAsString.length;++i){
+            let g = guessAsString.charAt(i);
+            for (let j = 0; j< secretAsString.length;++j){
+                let s = secretAsString.charAt(j);
+                if (g === s){
+                    if (i===j){
+                        perfectMatch++;
+                    } else {
+                        partialMatch++;
+                    }
+                }
+            }
+        }
+        if (partialMatch === 0 && perfectMatch=== 0)
+            return "No match";
+        let evaluationString = "";
+        if (partialMatch>0)
+            evaluationString += `-${partialMatch}`;
+        if (perfectMatch>0)
+            evaluationString += `+${perfectMatch}`;
+        return evaluationString;
     }
 
     render = () => {
@@ -92,6 +158,15 @@ class App extends React.PureComponent {
                             </tr>
                             </thead>
                             <tbody>
+                            {
+                                this.state.game.moves.map((move,index) =>
+                                    <tr>
+                                       <td>{index+1}</td>
+                                       <td>{move.guess}</td>
+                                       <td>{move.evaluation}</td>
+                                    </tr>
+                                )
+                            }
                             </tbody>
                         </table>
                     </div>
