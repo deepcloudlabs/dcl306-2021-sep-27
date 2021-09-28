@@ -3,10 +3,19 @@ import ReactDOM from 'react-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {Route, BrowserRouter as Router} from "react-router-dom";
+import UserWins from "./UserWins";
+import UserLoses from "./UserLoses";
+
+let routing = <Router>
+    <Route path="/" exact component={App}></Route>
+    <Route path="/wins" component={UserWins}></Route>
+    <Route path="/loses" component={UserLoses}></Route>
+</Router>;
 
 ReactDOM.render(
     <React.StrictMode>
-        <App/>
+        {routing}
     </React.StrictMode>,
     document.getElementById('root')
 );

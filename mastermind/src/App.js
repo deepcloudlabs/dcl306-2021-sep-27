@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import React from "react";
 import Move from "./model/move";
@@ -14,7 +13,7 @@ import TableHeader from "./component/table-header";
 //                  ... at most 10 moves -> User loses!
 //                  ... 60 seconds -> User loses! ->
 //                  statistics: Wins: 10 Loses: 22, ...
-//                  -> HTML5 -> Local storage -> component life cycle
+//                  ✔ HTML5 -> Local storage -> component life cycle
 // Stateless + Stateful Component ✔
 // Component Life Cycle
 // -> Redux, -> Routing
@@ -37,6 +36,17 @@ class App extends React.PureComponent {
         };
     }
 
+    componentDidMount = () => {
+        let gameState = localStorage.getItem("mastermind-game");
+        if (gameState === null || gameState === undefined) {
+            let state = {...this.state};
+            localStorage.setItem("mastermind-game", JSON.stringify(state));
+        } else {
+            let state = JSON.parse(gameState);
+            this.setState(state);
+        }
+    }
+
     createDigit = (min, max) => {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
@@ -48,7 +58,9 @@ class App extends React.PureComponent {
             if (!digits.includes(digit))
                 digits.push(digit);
         }
-        return digits.reduce((number, digit) => 10 * number + digit, 0);
+        let secret = digits.reduce((number, digit) => 10 * number + digit, 0);
+        console.log(secret);
+        return secret;
     }
 
     handleChange = (event) => {
@@ -64,24 +76,51 @@ class App extends React.PureComponent {
         if (game.guess === game.secret) {
             game.level++;
             if (game.level > 10) {
-                //TODO: Player wins!: routing!
+                game.level = 3;
+                game.secret = this.createSecret(game.level);
+                game.tries = 0;
+                game.moves = [];
+                game.secret = this.createSecret(game.level);
+                game.counter = 60;
                 statistics.wins++;
+                this.setState({game}, () => {
+                    this.saveStateOnLocalStorage();
+                    this.props.history.push("/wins");
+                });
             } else {
                 game.tries = 0;
                 game.moves = [];
                 game.secret = this.createSecret(game.level);
                 game.counter = 60;
-                this.setState({game});
+                this.setState({game}, () => {
+                    this.saveStateOnLocalStorage();
+                });
             }
         } else {
             if (game.tries > 10) {
-                //TODO: Player loses!: routing!
                 statistics.loses++;
+                game.tries = 0;
+                game.moves = [];
+                game.secret = this.createSecret(game.level);
+                game.counter = 60;
+                this.setState({game}, () => {
+                    this.saveStateOnLocalStorage();
+                    this.props.history.push("/loses");
+                } , () => {
+                    this.saveStateOnLocalStorage();
+                });
             } else {
                 game.moves.push(new Move(game.guess, this.createEvaluation(game.guess, game.secret)));
-                this.setState({game});
+                this.setState({game}, () => {
+                    this.saveStateOnLocalStorage();
+                });
             }
         }
+    }
+
+    saveStateOnLocalStorage = () => {
+        let state = {...this.state};
+        localStorage.setItem("mastermind-game", JSON.stringify(state));
     }
 
     createEvaluation = (guess, secret) => {
