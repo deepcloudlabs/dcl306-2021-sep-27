@@ -1,6 +1,7 @@
 import {useState} from "react";
 import Employee from "./model/employee";
 import CardTitle from "./component/card-title";
+import './App.css';
 
 // Component
 // 1. Stateless -> function
@@ -20,17 +21,21 @@ function HrApp() {
         this.setState({. . . })
      */
     return (
-        <div className="container-lg">
+        <div className="container-md">
+            <p></p>
             <div className="card">
                 <CardTitle title="HR Panel"></CardTitle>
                 <div className="card-body">
                     <div className="mb-3">
                         <label className="form-label" htmlFor="identity">Identity:</label>
-                        <input id="identity"
-                               name="identity"
-                               className="form-control"
-                               type="text"
-                               value={employee.identityNo}></input>
+                        <div className="col">
+                            <input id="identity"
+                                   name="identity"
+                                   className="col-10 btn-space"
+                                   type="text"
+                                   value={employee.identityNo}></input>
+                            <button className="btn btn-success">Find Employee</button>
+                        </div>
                     </div>
                     <div className="mb-3">
                         <label className="form-label" htmlFor="fullname">Full Name:</label>
@@ -93,11 +98,60 @@ function HrApp() {
                     </div>
                     <div className="mb-3">
                         <label htmlFor="photo">Photo:</label>
-                        <img id="photo" src={employee.photo}></img>
-                        <label className="form-label" className="btn btn-success btn-lg">
-                            <input type="file" style={{display: "none"}}  type="button"></input>
+                        <img id="photo" alt="" src={employee.photo}></img>
+                        <label className="btn btn-success btn-lg">
+                            <input type="file" style={{display: "none"}}></input>
                             Load
                         </label>
+                    </div>
+                    <div className="mb-3">
+                        <button className="btn btn-success btn-space">Hire Employee</button>
+                        <button className="btn btn-warning btn-space">Update Employee</button>
+                        <button className="btn btn-danger btn-space">Fire Employee</button>
+                        <button className="btn btn-info">Retrieve All</button>
+                    </div>
+                </div>
+            </div>
+            <p></p>
+            <div className="card">
+                <CardTitle title="Employees"></CardTitle>
+                <div className="card-body">
+                    <div className="mb-3">
+                        <table className="table table-bordered table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <td>No</td>
+                                <td>Identity No</td>
+                                <td>Fullname</td>
+                                <td>Iban</td>
+                                <td>Salary</td>
+                                <td>BirthYear</td>
+                                <td>Department</td>
+                                <td>Photo</td>
+                                <td>Full time</td>
+                                <td>Operations</td>
+                            </tr>
+                            </thead>
+                            <tbody>{
+                                employees.map((emp, idx) =>
+                                    <tr key={emp.identityNo}>
+                                        <td>{idx + 1}</td>
+                                        <td>{emp.identityNo}</td>
+                                        <td>{emp.fullname}</td>
+                                        <td>{emp.iban}</td>
+                                        <td>{emp.salary}</td>
+                                        <td>{emp.birthYear}</td>
+                                        <td>{emp.department}</td>
+                                        <td><img alt="" src={emp.photo}/></td>
+                                        <td>{emp.fulltime ? 'FULL TIME' : 'PART TIME'}</td>
+                                        <td>
+                                            <button className="btn btn-danger">Fire Employee</button>
+                                        </td>
+                                    </tr>
+                                )
+                            }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
