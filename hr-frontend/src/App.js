@@ -76,7 +76,35 @@ function HrApp() {
             .then( res => alert("Employee is updated!"));
     }
 
-    function fireEmployee() {}
+    function fireEmployee() {
+        fetch(`${REST_API_BASE_URL}/${employee.identityNo}`,{
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        })
+            .then( res => res.json())
+            //.then( emp => setEmployee(emp) );
+            .then( setEmployee );
+    }
+
+    function fireEmployeeByIdentity(identityNo) {
+        fetch(`${REST_API_BASE_URL}/${identityNo}`,{
+            method: "DELETE",
+            headers: {
+                "Accept": "application/json"
+            }
+        })
+            .then( res => res.json())
+            .then( emp => {
+                setEmployee(emp);
+                setEmployees([...employees].filter( clonedEmp => clonedEmp.identityNo !== identityNo));
+            } );
+    }
+
+    function copyRow(emp) {
+        setEmployee(emp);
+    }
 
     function findEmployee() {
         fetch(`${REST_API_BASE_URL}/${employee.identityNo}`,{
@@ -223,7 +251,8 @@ function HrApp() {
                             </thead>
                             <tbody>{
                                 employees.map((emp, idx) =>
-                                    <tr key={emp.identityNo}>
+                                    <tr key={emp.identityNo}
+                                        onClick={() => copyRow(emp)}>
                                         <td>{idx + 1}</td>
                                         <td>{emp.identityNo}</td>
                                         <td>{emp.fullname}</td>
@@ -234,7 +263,8 @@ function HrApp() {
                                         <td><img alt="" src={emp.photo}/></td>
                                         <td>{emp.fulltime ? 'FULL TIME' : 'PART TIME'}</td>
                                         <td>
-                                            <button className="btn btn-danger">Fire Employee</button>
+                                            <button onClick={() => fireEmployeeByIdentity(emp.identityNo)}
+                                                    className="btn btn-danger">Fire Employee</button>
                                         </td>
                                     </tr>
                                 )
