@@ -5,6 +5,7 @@
 //    *** i) javascript class -> class -- extends --> React.PureComponent
 //       ii) react hooks! --> function
 import React from "react";
+import './Lottery.css';
 
 // Stateful Component
 class Lottery extends React.PureComponent {
@@ -16,12 +17,12 @@ class Lottery extends React.PureComponent {
         };
     }
 
-    draw = (event) => {
+    draw = (event) => { // event
         let newLotteryNumbers = [...this.state.numbers];
         for (let i = 0; i < this.state.column; ++i) {
             newLotteryNumbers.push(this.getLotteryNumbers(1, 60, 6));
         }
-        this.setState({
+        this.setState({ // async
             numbers: newLotteryNumbers
         });
     }
@@ -52,14 +53,47 @@ class Lottery extends React.PureComponent {
     }
 
     removeLotteryNumbers = (index) => {
-        this.setState({
-            numbers: this.state.numbers.filter((lotteryNumbers,idx) => index !== idx)
+        this.setState({ // async
+            numbers: this.state.numbers.filter((lotteryNumbers, idx) => index !== idx) // functional
         })
     }
 
     render = () => {
+        let table = "" // View
+        if (this.state.numbers.length > 0) {
+            table = <table className="table table-bordered table-hover table-striped">
+                <thead>
+                <tr>
+                    <th>No</th>
+                    {
+                        Array.from(Array(6).keys()).map(i =>
+                            <th>Column #{i + 1}</th>
+                        )
+                    }
+                    <th>Operations</th>
+                </tr>
+                </thead>
+                <tbody>{
+                    this.state.numbers.map((lotteryNumbers, index) =>
+                        <tr key={index}>
+                            <td>{index + 1}</td>
+                            {
+                                lotteryNumbers.map(number =>
+                                    <td>{number}</td>
+                                )
+                            }
+                            <td>
+                                <button onClick={() => this.removeLotteryNumbers(index)}
+                                        className="btn btn-danger">Remove
+                                </button>
+                            </td>
+                        </tr>)
+                }
+                </tbody>
+            </table>;
+        }
         // return MVC's V(iew)
-        return ( // View
+        return ( // View -> Component Based + Functional Programming: Higher-function (map()) -> Model (this.state.numbers) -> View
             <div className="container">
                 <div className="card">
                     <div className="card-header">
@@ -67,48 +101,22 @@ class Lottery extends React.PureComponent {
                     </div>
                     <div className="card-body">
                         <div className="form-group">
-                            <label htmlFor="column">Column:</label>
+                            <label className="form-label horizontal-space" htmlFor="column">Column:</label>
                             <input id="column"
                                    name="column"
+                                   className="form-control form-control-sm"
                                    onChange={this.handleChange}
-                                   type="text" value={this.state.column}></input>
-                        </div>
-                        <div className="form-group">
-                            <button className="btn btn-success"
+                                   type="text"
+                                   value={this.state.column}></input>
+                            <button className="btn btn-success horizontal-space"
                                     onClick={this.draw}>Draw
                             </button>
                             <button className="btn btn-warning"
                                     onClick={this.reset}>Reset
                             </button>
                         </div>
-                        <div className="form-group">
-                            <table className="table table-bordered table-hover table-responsive table-info">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        {
-                                           Array.from(Array(6).keys()).map( i =>
-                                               <th>Column #{i+1}</th>
-                                           )
-                                        }
-                                        <th>Operations</th>
-                                    </tr>
-                                </thead>
-                                <tbody>{
-                                    this.state.numbers.map( (lotteryNumbers,index) =>
-                                        <tr>
-                                           <td>{index+1}</td>
-                                            {
-                                               lotteryNumbers.map( number =>
-                                                  <td>{number}</td>
-                                               )
-                                        }
-                                        <td><button onClick={() => this.removeLotteryNumbers(index)} className="btn btn-danger">Remove</button></td>
-                                        </tr>)
-                                }
-                                </tbody>
-                            </table>
-                        </div>
+                        <p></p>
+                        {table}
                     </div>
                 </div>
             </div>
