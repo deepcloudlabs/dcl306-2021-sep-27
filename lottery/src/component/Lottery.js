@@ -67,7 +67,7 @@ class Lottery extends React.PureComponent {
                     <th>No</th>
                     {
                         Array.from(Array(6).keys()).map(i =>
-                            <th>Column #{i + 1}</th>
+                            <th key={i}>Column #{i + 1}</th>
                         )
                     }
                     <th>Operations</th>
@@ -79,7 +79,7 @@ class Lottery extends React.PureComponent {
                             <td>{index + 1}</td>
                             {
                                 lotteryNumbers.map(number =>
-                                    <td>{number}</td>
+                                    <td key={number}>{number}</td>
                                 )
                             }
                             <td>
