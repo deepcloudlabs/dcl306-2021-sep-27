@@ -2,6 +2,10 @@ import {useState} from "react";
 import Employee from "./model/employee";
 import CardTitle from "./component/card-title";
 import './App.css';
+import EmployeeValidationModel from "./model/employee-validation";
+import validateIdentityNo from "./model/identity-validation";
+import validateIban from "./model/iban-validation";
+import EmployeesCard from "./component/employees_card";
 
 // Component
 // 1. Stateless -> function
@@ -21,37 +25,68 @@ function HrApp() {
     const REST_API_BASE_URL = "http://localhost:4001/employees";
 
     let [employee, setEmployee] = useState(new Employee());
+    let [validationModel, setValidationModel] = useState(new EmployeeValidationModel());
     let [employees, setEmployees] = useState([]);
 
+    //region validation
+    function validateEmployee(emp, fieldName) {
+        let newValidationModel = {...validationModel};
+
+        switch (fieldName) {
+            case "identityNo":
+                newValidationModel.isIdentityNoValid = validateIdentityNo(emp[fieldName]);
+                newValidationModel.identityNoValidationMessage = "";
+                if (!newValidationModel.isIdentityNoValid)
+                    newValidationModel.identityNoValidationMessage =
+                        <span className="alert-danger">This is not a valid identity no!</span>;
+                break;
+            case "iban":
+                newValidationModel.isIbanNoValid = validateIban(emp[fieldName]);
+                newValidationModel.ibanValidationMessage = "";
+                if (!newValidationModel.isIbanNoValid)
+                    newValidationModel.ibanValidationMessage =
+                        <span className="alert-danger">This is not a valid iban!</span>;
+                break;
+            default:
+                console.error(`validation for ${fieldName} is not implemented yet!`);
+        }
+        newValidationModel.isModelValid = newValidationModel.isIdentityNoValid && newValidationModel.isIbanNoValid;
+        setValidationModel(newValidationModel);
+    }
+
+    //endregion
+
     //region handle changes
-    function handleInputChange(event){
+    function handleInputChange(event) {
         const value = event.target.value;
         const name = event.target.name;
         console.log(event.target.type);
         let emp = {...employee}; // cloning the employee
-        if (name==="fulltime"){
+        if (name === "fulltime") {
             emp.fulltime = !emp.fulltime;
         } else {
             emp[name] = value;
         }
+        validateEmployee(emp, name);
         setEmployee(emp);
     }
 
-    function handleFileInput(event){
-         const filename = event.target.files[0];
-         const reader = new FileReader();
-         reader.onload = (e) => {
+    function handleFileInput(event) {
+        const filename = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
             let emp = {...employee}; // cloning the employee
             emp.photo = e.target.result;
             setEmployee(emp);
-         };
-         reader.readAsDataURL(filename); // asynchronous
+        };
+        reader.readAsDataURL(filename); // asynchronous
     }
+
     //endregion
 
     //region onClick functions
     function hireEmployee() {
-        fetch(REST_API_BASE_URL,{
+        fetch(REST_API_BASE_URL, {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -59,12 +94,12 @@ function HrApp() {
             },
             body: JSON.stringify(employee)
         })
-            .then( res => res.json())
-            .then( res => alert("Employee is hired!"));
+            .then(res => res.json())
+            .then(res => alert("Employee is hired!"));
     }
 
     function updateEmployee() {
-        fetch(REST_API_BASE_URL,{
+        fetch(REST_API_BASE_URL, {
             method: "PUT",
             headers: {
                 "Accept": "application/json",
@@ -72,34 +107,34 @@ function HrApp() {
             },
             body: JSON.stringify(employee)
         })
-            .then( res => res.json())
-            .then( res => alert("Employee is updated!"));
+            .then(res => res.json())
+            .then(res => alert("Employee is updated!"));
     }
 
     function fireEmployee() {
-        fetch(`${REST_API_BASE_URL}/${employee.identityNo}`,{
+        fetch(`${REST_API_BASE_URL}/${employee.identityNo}`, {
             method: "DELETE",
             headers: {
                 "Accept": "application/json"
             }
         })
-            .then( res => res.json())
+            .then(res => res.json())
             //.then( emp => setEmployee(emp) );
-            .then( setEmployee );
+            .then(setEmployee);
     }
 
     function fireEmployeeByIdentity(identityNo) {
-        fetch(`${REST_API_BASE_URL}/${identityNo}`,{
+        fetch(`${REST_API_BASE_URL}/${identityNo}`, {
             method: "DELETE",
             headers: {
                 "Accept": "application/json"
             }
         })
-            .then( res => res.json())
-            .then( emp => {
+            .then(res => res.json())
+            .then(emp => {
                 setEmployee(emp);
-                setEmployees([...employees].filter( clonedEmp => clonedEmp.identityNo !== identityNo));
-            } );
+                setEmployees([...employees].filter(clonedEmp => clonedEmp.identityNo !== identityNo));
+            });
     }
 
     function copyRow(emp) {
@@ -107,26 +142,27 @@ function HrApp() {
     }
 
     function findEmployee() {
-        fetch(`${REST_API_BASE_URL}/${employee.identityNo}`,{
+        fetch(`${REST_API_BASE_URL}/${employee.identityNo}`, {
             method: "GET",
             headers: {
                 "Accept": "application/json"
             }
         })
-            .then( res => res.json())
-            .then( emp => setEmployee(emp) );
+            .then(res => res.json())
+            .then(emp => setEmployee(emp));
     }
 
     function retrieveAll() {
-        fetch(REST_API_BASE_URL,{
+        fetch(REST_API_BASE_URL, {
             method: "GET",
             headers: {
                 "Accept": "application/json"
             }
         })
-            .then( res => res.json())
-            .then( emps => setEmployees(emps));
+            .then(res => res.json())
+            .then(emps => setEmployees(emps));
     }
+
     //endregion
 
     return (
@@ -146,6 +182,7 @@ function HrApp() {
                                    value={employee.identityNo}></input>
                             <button onClick={findEmployee} className="btn btn-success">Find Employee</button>
                         </div>
+                        {validationModel.identityNoValidationMessage}
                     </div>
                     <div className="mb-3">
                         <label className="form-label" htmlFor="fullname">Full Name:</label>
@@ -164,6 +201,7 @@ function HrApp() {
                                onChange={handleInputChange}
                                className="form-control"
                                value={employee.iban}></input>
+                        {validationModel.ibanValidationMessage}
                     </div>
                     <div className="mb-3">
                         <label className="form-label" htmlFor="salary">Salary:</label>
@@ -219,61 +257,27 @@ function HrApp() {
                     </div>
                     <div className="mb-3">
                         <button className="btn btn-success btn-space"
-                                onClick={hireEmployee}>Hire Employee</button>
+                                disabled={!validationModel.isModelValid}
+                                onClick={hireEmployee}>Hire Employee
+                        </button>
                         <button className="btn btn-warning btn-space"
-                                onClick={updateEmployee}>Update Employee</button>
+                                disabled={!validationModel.isModelValid}
+                                onClick={updateEmployee}>Update Employee
+                        </button>
                         <button className="btn btn-danger btn-space"
-                                onClick={fireEmployee}>Fire Employee</button>
+                                disabled={!validationModel.isIdentityNoValid}
+                                onClick={fireEmployee}>Fire Employee
+                        </button>
                         <button className="btn btn-info"
-                                onClick={retrieveAll}>Retrieve All</button>
+                                onClick={retrieveAll}>Retrieve All
+                        </button>
                     </div>
                 </div>
             </div>
             <p></p>
-            <div className="card">
-                <CardTitle title="Employees"></CardTitle>
-                <div className="card-body">
-                    <div className="mb-3">
-                        <table className="table table-bordered table-striped table-hover">
-                            <thead>
-                            <tr>
-                                <td>No</td>
-                                <td>Identity No</td>
-                                <td>Fullname</td>
-                                <td>Iban</td>
-                                <td>Salary</td>
-                                <td>BirthYear</td>
-                                <td>Department</td>
-                                <td>Photo</td>
-                                <td>Full time</td>
-                                <td>Operations</td>
-                            </tr>
-                            </thead>
-                            <tbody>{
-                                employees.map((emp, idx) =>
-                                    <tr key={emp.identityNo}
-                                        onClick={() => copyRow(emp)}>
-                                        <td>{idx + 1}</td>
-                                        <td>{emp.identityNo}</td>
-                                        <td>{emp.fullname}</td>
-                                        <td>{emp.iban}</td>
-                                        <td>{emp.salary}</td>
-                                        <td>{emp.birthYear}</td>
-                                        <td>{emp.department}</td>
-                                        <td><img alt="" src={emp.photo}/></td>
-                                        <td>{emp.fulltime ? 'FULL TIME' : 'PART TIME'}</td>
-                                        <td>
-                                            <button onClick={() => fireEmployeeByIdentity(emp.identityNo)}
-                                                    className="btn btn-danger">Fire Employee</button>
-                                        </td>
-                                    </tr>
-                                )
-                            }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            <EmployeesCard employees={employees}
+                           copyRow={copyRow}
+                           fireEmpById={fireEmployeeByIdentity}></EmployeesCard>
         </div>
     );
 }

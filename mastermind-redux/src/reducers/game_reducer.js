@@ -20,8 +20,15 @@ const initialState = {
 // export default  function GameReducer(state = initialState,action){
 export default  function GameReducer(state ,action){
     if (state === undefined){
-        // initial state
-        return initialState;
+        let gameState = localStorage.getItem("master-game");
+        let localState;
+        if (gameState === null || gameState === undefined) {
+            localState = initialState;
+            localStorage.setItem("master-game", JSON.stringify(localState));
+        } else {
+            localState = JSON.parse(gameState);
+        }
+        return localState;
     }
     let newState = {...state} // clone
     //TODO: action -> change the state
@@ -52,5 +59,7 @@ export default  function GameReducer(state ,action){
             }
             break;
     }
+    // save newState on localStorage
+    localStorage.setItem("master-game", JSON.stringify(newState));
     return newState;
 }

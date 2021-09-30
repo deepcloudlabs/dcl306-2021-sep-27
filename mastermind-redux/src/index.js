@@ -16,7 +16,7 @@ import MastermindConnector from "./components/mastermind_connector";
 //          inputs: 2 parameters: 1) state 2) action -> event -> command
 //          output: return new state
 // reducer -> updates state -> (state, action)
-let reducers = combineReducers({gameStore: GameReducer})
+let reducers = combineReducers({gameStore: GameReducer},{})
 let store = createStore(reducers);
 
 // 1. Mastermind --> stateful function component
